@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from init import db, cors
 import time
 from model.user import Users, initUserTable
+from model.leaderboard import Leaderboard, initLeaderboard
 import datetime
 import json
 
@@ -99,4 +100,5 @@ def run():
     app.run(host='0.0.0.0',port=8086)
 
 initUserTable()
+initLeaderboard()
 run()
