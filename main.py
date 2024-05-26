@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from init import db, cors
 import time
 from model.user import Users, initUserTable
-from model.leaderboard import Leaderboard, initLeaderboard
+from model.leaderboard import Leaderboard, initLeaderboard, Scores, initScores
 import datetime
 import json
 
@@ -96,9 +96,29 @@ def updateUser(current_user):
     user = Users.query.filter_by(userID=current_user.userID).first()
     return user.update(data["oldPW"],data["newPW"],data["username"],data["pfp"],data["bio"])
 
+@app.route("/saveScore/", methods=["POST"])
+@token_required
+def updateScore(current_user):
+    data = request.get_json()
+    try:
+        score = int(data['score'])
+    except:
+        return "Score is not a valid integer"
+    date = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+    newScore = Scores(user=current_user.userID, score=score, date=date)
+    db.session.add(newScore)
+    user = Leaderboard.query.filter_by(user=current_user.userID)
+    highScore = user.update(score, date)
+    db.session.commit()
+    if highScore:
+        return f"Score saved successfully. New high score of {score}!"
+    else:
+        return "Score saved successfully. No new high score."
+
 def run():
     app.run(host='0.0.0.0',port=8086)
 
 initUserTable()
 initLeaderboard()
+initScores()
 run()
