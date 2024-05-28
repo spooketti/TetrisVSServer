@@ -2,6 +2,8 @@ from init import db, app
 import time
 from werkzeug.security import check_password_hash,generate_password_hash
 
+    
+
 class Leaderboard(db.Model):
     __tablename__ = "leaderboard"
     user = db.Column(db.Integer,db.ForeignKey('users.id'))
@@ -22,6 +24,7 @@ class Leaderboard(db.Model):
             'highScore': self.highScore,
             'date': self.date
         }
+
 
 class Scores(db.Model):
     __tablename__ = "scores"

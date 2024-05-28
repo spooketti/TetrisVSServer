@@ -60,11 +60,40 @@ def auth(current_user):
                     "bio":current_user.bio
                     })
 
+
+def partition(arr, low, high):
+    pivot = arr[high]["highScore"]
+    index1 = low - 1
+
+    for index2 in range(low, high):
+        if arr[index2]["highScore"] <= pivot:
+            index1 += 1
+            temp = arr[index1]
+            arr[index1] = arr[index2]
+            arr[index2] = temp
+    
+    temp = arr[high]
+    arr[high] = arr[index1 + 1]
+    arr[index1 + 1] = arr[high]
+    return index1 + 1
+
+
+def quicksort(arr, low, high):
+    if low < high:
+        pivot_index = partition(arr, low, high)
+        quicksort(arr, low, pivot_index-1)
+        quicksort(arr, pivot_index+1, high)
+
+
+
 @app.route('/getLeaderboard/', methods=['GET'])
 def getLeaderboard():
     leaderboard = Leaderboard.query.all()
-    json_ready = [entry.read() for entry in leaderboard]
-    return jsonify(json_ready)
+    arr = [entry.read() for entry in leaderboard]
+    quicksort(arr, 0, len(arr) - 1)
+    return jsonify(arr)
+
+
 
 
 @app.route('/login/', methods=['POST'])  
