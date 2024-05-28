@@ -59,7 +59,14 @@ def auth(current_user):
                     "joindate":current_user.date,
                     "bio":current_user.bio
                     })
-    
+
+@app.route('/getLeaderboard/', methods=['GET'])
+def getLeaderboard():
+    leaderboard = Leaderboard.query.all()
+    json_ready = [entry.read() for entry in leaderboard]
+    return jsonify(json_ready)
+
+
 @app.route('/login/', methods=['POST'])  
 def login_user(): 
     data = request.get_json()
@@ -114,6 +121,7 @@ def updateScore(current_user):
         return f"Score saved successfully. New high score of {score}!"
     else:
         return "Score saved successfully. No new high score."
+
 
 def run():
     app.run(host='0.0.0.0',port=8086)

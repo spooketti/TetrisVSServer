@@ -16,6 +16,12 @@ class Leaderboard(db.Model):
             return True
         else:
             return False
+    def read(self):
+        return {
+            'user': self.user,
+            'highScore': self.highScore,
+            'date': self.date
+        }
 
 class Scores(db.Model):
     __tablename__ = "scores"
