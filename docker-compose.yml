@@ -1,0 +1,11 @@
+version: '3'
+services:
+        web:
+                image: cpt_v1
+                build: .
+                ports:
+                        - "8069:8069"
+                volumes:
+                        - ./volumes:/volumes
+                        - ./instance:/instance
+                restart: unless-stopped
