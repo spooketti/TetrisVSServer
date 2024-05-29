@@ -137,14 +137,17 @@ def updateUser(current_user):
 def updateScore(current_user):
     data = request.get_json()
     try:
-        score = int(data['score'])
+        score = data['score']
+        print(type(score))
+        score = int(score)
     except:
         return "Score is not a valid integer"
     date = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
     newScore = Scores(user=current_user.userID, score=score, date=date)
     db.session.add(newScore)
     user = Leaderboard.query.filter_by(user=current_user.userID)
-    highScore = user.update(score, date)
+    user.update(score, date)
+    highScore = True
     db.session.commit()
     if highScore:
         return f"Score saved successfully. New high score of {score}!"

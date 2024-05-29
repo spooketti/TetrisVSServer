@@ -13,7 +13,7 @@ class Leaderboard(db.Model):
     
     def update(self, newScore, date):
         if newScore > self.highScore:
-            self.highscore = newScore
+            self.highScore = newScore
             self.date = date
             return True
         else:
