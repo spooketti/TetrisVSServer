@@ -60,38 +60,31 @@ def auth(current_user):
                     "bio":current_user.bio
                     })
 
+def mergesort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = mergesort(arr[:mid])
+    right = mergesort(arr[mid:])
+    return merge(left, right)
 
-def partition(arr, low, high):
-    pivot = arr[high]["highScore"]
-    index1 = low - 1
-
-    for index2 in range(low, high):
-        if arr[index2]["highScore"] <= pivot:
-            index1 += 1
-            temp = arr[index1]
-            arr[index1] = arr[index2]
-            arr[index2] = temp
-    
-    temp = arr[high]
-    arr[high] = arr[index1 + 1]
-    arr[index1 + 1] = arr[high]
-    return index1 + 1
-
-
-def quicksort(arr, low, high):
-    if low < high:
-        pivot_index = partition(arr, low, high)
-        quicksort(arr, low, pivot_index-1)
-        quicksort(arr, pivot_index+1, high)
-
+def merge(left, right):
+    result = []
+    while left and right:
+        if left[0]["highScore"] > right[0]['highScore']:  # Compare based on the score
+            result.append(left.pop(0))
+        else:
+            result.append(right.pop(0))
+    result.extend(left or right)
+    return result
 
 
 @app.route('/getLeaderboard/', methods=['GET'])
 def getLeaderboard():
     leaderboard = Leaderboard.query.all()
-    arr = [entry.read() for entry in leaderboard]
-    quicksort(arr, 0, len(arr) - 1)
-    return jsonify(arr)
+    lst = [entry.read() for entry in leaderboard]
+    sorted_lst = mergesort(lst)
+    return jsonify(sorted_lst)
 
 
 
