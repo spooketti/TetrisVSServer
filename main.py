@@ -165,7 +165,6 @@ def updateScore(current_user):
     userID = current_user.userID
     try:
         score = data['score']
-        print(type(score))
         score = int(score)
     except:
         return "Score is not a valid integer"
