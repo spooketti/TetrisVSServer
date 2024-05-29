@@ -179,7 +179,7 @@ def updateScore(current_user):
 
 
 def run():
-    app.run(host='0.0.0.0',port=8069)
+    app.run(host='0.0.0.0',port=8080)
 
 initUserTable()
 initLeaderboard()

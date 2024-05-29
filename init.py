@@ -1,9 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-import os
 
-app = Flask("Relay Server")
+app = Flask("TetrisVS Server")
 cors = CORS(app, supports_credentials=True)
 dbURI = 'sqlite:///sqlite.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = dbURI
