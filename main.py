@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify, make_response, Response
 from threading import Thread
-from init import app, socketio
-from flask_sqlalchemy import SQLAlchemy 
-from flask_socketio import join_room
+from init import app
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 from authToken import token_required
 import jwt
