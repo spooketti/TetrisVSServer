@@ -30,7 +30,13 @@ class Users(db.Model):
         db.session.commit()
         
         return "Success"
-      
+
+
+    # check password parameter versus stored/encrypted password
+    def is_password(self, password):
+        """Check against hashed password."""
+        result = check_password_hash(self.password, password)
+        return result
     
 def initUserTable():
     with app.app_context():

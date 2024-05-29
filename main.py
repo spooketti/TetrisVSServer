@@ -98,32 +98,58 @@ def getLeaderboard():
 
 @app.route('/login/', methods=['POST'])  
 def login_user(): 
-    data = request.get_json()
-    loginID = data["userID"]
-    loginPW = data["password"]
-    user = Users.query.filter_by(userID=loginID).first()
-    if not user:
-        response = {"error":"User does not exist!"}
-        return jsonify(response)
-    
-    if check_password_hash(user.password, loginPW):
-        token = jwt.encode({'userID' : user.userID, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=60)}, app.config['SECRET_KEY'], algorithm="HS256")
-        response = {"jwt":token}
-        json_data = json.dumps(response)
-        resp = Response(json_data, content_type="application/json")
+    try:
+        body = request.get_json()
+        if not body:
+            return {
+                "message": "Please provide user details",
+                "data": None,
+                "error": "Bad request"
+            }, 400
+        ''' Get Data '''
+        userID = body.get('userID')
+        if userID is None:
+            return {'message': f'User ID is missing'}, 400
+        password = body.get('password')
         
-        resp.set_cookie("jwt", token,
-                                max_age=3600,
-                                secure=True,
-                                httponly=True,
-                                path='/',
-                                samesite='None',  # cite
-                                domain="172.27.233.236"
-                                )
-        return resp
-
-
-    return make_response('Invalid Credentials',  401, {'Authentication': '"login required"'})
+        ''' Find user '''
+        user = Users.query.filter_by(userID=userID).first()
+        if user is None or not user.is_password(password):
+            return {'message': f"Invalid user id or password"}, 401
+        if user:
+            try:
+                token = jwt.encode(
+                    {"userID": user.userID},
+                    app.config["SECRET_KEY"],
+                    algorithm="HS256"
+                )
+                resp = Response("Authentication for %s successful" % (user.userID))
+                resp.set_cookie("jwt", token,
+                        max_age=3600,
+                        secure=True,
+                        httponly=True,
+                        path='/',
+                        samesite='None'  # This is the key part for cross-site request
+                        # domain="frontend.com"
+                        )
+                return resp
+            except Exception as e:
+                return {
+                    "error": "Something went wrong",
+                    "message": str(e)
+                }, 500
+        return {
+            "message": "Error fetching auth token!",
+            "data": None,
+            "error": "Unauthorized"
+        }, 404
+    except Exception as e:
+        return {
+                "message": "Something went wrong!",
+                "error": str(e),
+                "data": None
+        }, 500
+    
 
 @app.route("/updateUser/",methods=["POST"])
 @token_required
@@ -136,6 +162,7 @@ def updateUser(current_user):
 @token_required
 def updateScore(current_user):
     data = request.get_json()
+    userID = current_user.userID
     try:
         score = data['score']
         print(type(score))
@@ -143,15 +170,21 @@ def updateScore(current_user):
     except:
         return "Score is not a valid integer"
     date = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-    newScore = Scores(user=current_user.userID, score=score, date=date)
+    newScore = Scores(user=userID, score=score, date=date)
     db.session.add(newScore)
-    user = Leaderboard.query.filter_by(user=current_user.userID)
-    user.update(score, date)
-    highScore = True
-    db.session.commit()
-    if highScore:
+    curr_user = Leaderboard.query.filter_by(user=userID).first()
+    if curr_user == None:
+        entry = Leaderboard(user=userID, highScore=score, date=date)
+        db.session.add(entry)
+        db.session.commit()
+        return f"Score saved successfully. New high score of {score}!"
+    elif score > curr_user._highScore:
+        curr_user._highScore = score
+        curr_user._date = date
+        db.session.commit()
         return f"Score saved successfully. New high score of {score}!"
     else:
+        db.session.commit()
         return "Score saved successfully. No new high score."
 
 
